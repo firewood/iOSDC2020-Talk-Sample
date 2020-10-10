@@ -23,6 +23,10 @@ jobs:
         with:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           submodules: true
+
+      # Copied from main.yml
+
+      # Bundlerで管理しているライブラリのキャッシュ
       - name: Cache Gems
         uses: actions/cache@v2
         with:
@@ -30,8 +34,25 @@ jobs:
           key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
           restore-keys: |
             ${{ runner.os }}-gems-
+
+      # Bundlerで管理しているライブラリのインストール
       - name: Install Bundled Gems
         run: make install-bundler
+
+      # Mintのインストール
+      - name: Install Mint
+        run: brew install mint
+
+      # Mintで管理しているライブラリのキャッシュ
+      - name: Cache Mint packages
+        uses: actions/cache@v2
+        with:
+          path: mint
+          key: ${{ runner.os }}-mint-${{ hashFiles('**/Mintfile') }}
+          restore-keys: |
+            ${{ runner.os }}-mint-
+
+      # Carthageで管理しているライブラリのキャッシュ
       - name: Cache Carthage packages
         uses: actions/cache@v2
         with:
@@ -39,10 +60,14 @@ jobs:
           key: ${{ runner.os }}-carthage-${{ hashFiles('**/Cartfile.resolved') }}
           restore-keys: |
             ${{ runner.os }}-carthage-
+
+      # Carthageで管理しているライブラリのインストール
       - name: Install Carthage frameworks
         run: make install-carthage
         env:
           GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # CocoaPodsで管理しているライブラリのキャッシュ
       - name: Cache Pods
         uses: actions/cache@v2
         with:
@@ -50,8 +75,11 @@ jobs:
           key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
           restore-keys: |
             ${{ runner.os }}-pods-
+
+      # プロジェクトファイルの生成、CocoaPodsで管理しているライブラリのインストール
       - name: Generate Xcode project and install Pods
         run: make generate-xcodeproj
+
       - name: Archive
         run: |
           zip -r ${{ steps.version.outputs.filename }}.zip ./ -x "*.git*"
