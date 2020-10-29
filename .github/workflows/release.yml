@@ -78,6 +78,8 @@ jobs:
 
       # プロジェクトファイルの生成、CocoaPodsで管理しているライブラリのインストール
       - name: Generate Xcode project and install Pods
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: make generate-xcodeproj
 
       - name: Archive
